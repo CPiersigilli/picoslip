@@ -2,9 +2,9 @@ name: macOS build and tests
 on:
   push:
     branches: [main]
-    paths: [core/**, macos/**, Package.swift, .github/workflows/macos.yml]
+    paths: [core/**, macos/**, Package.swift, tools/make-macos-dmg.sh, .github/workflows/macos.yml]
   pull_request:
-    paths: [core/**, macos/**, Package.swift, .github/workflows/macos.yml]
+    paths: [core/**, macos/**, Package.swift, tools/make-macos-dmg.sh, .github/workflows/macos.yml]
   workflow_dispatch:
 permissions:
   contents: read
@@ -20,3 +20,11 @@ jobs:
         run: swift build -c release
       - name: Run tests
         run: swift test
+      - name: Package PicoSlip.app and the disk image
+        run: tools/make-macos-dmg.sh
+      - name: Save the disk image
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: PicoSlip-macOS
+          path: dist/macos/*.dmg
+          if-no-files-found: error

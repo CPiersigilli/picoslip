@@ -6,6 +6,12 @@ A native macOS 26 port that reads and writes the same archive as the Windows app
 
 Open `Package.swift` in Xcode 26, choose the **PicoSlip** scheme and **My Mac**, and press Run. `swift build` and `swift test` work from Terminal too. The **macOS build and tests** workflow builds and tests every change to `core/`, `macos/` or the package on a macOS 26 runner.
 
+## Install from a disk image
+
+`tools/make-macos-dmg.sh` builds a universal `PicoSlip.app` (Apple silicon and Intel) and `dist/macos/PicoSlip-<version>.dmg`. Open the disk image and drag PicoSlip to Applications. The **macOS build and tests** workflow also attaches the disk image to each run as the `PicoSlip-macOS` artifact.
+
+The app is signed ad-hoc unless `SIGN_IDENTITY` names a certificate (a free Apple Development certificate works for your own Macs). It is not notarized, which needs a paid Apple Developer membership, so a copy downloaded from the internet is blocked the first time: open it once, then choose **Open Anyway** in System Settings → Privacy & Security. A disk image built on the same Mac opens directly.
+
 PicoSlip lives in the menu bar (no Dock icon): **New note**, **Browse notes**, **Search notes**, **Open notes archive**, **Note style**, **Exit**.
 
 ## Using it
