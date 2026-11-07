@@ -1,0 +1,22 @@
+name: macOS build and tests
+on:
+  push:
+    branches: [main]
+    paths: [core/**, macos/**, Package.swift, .github/workflows/macos.yml]
+  pull_request:
+    paths: [core/**, macos/**, Package.swift, .github/workflows/macos.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  macos:
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Toolchain
+        run: swift --version && xcodebuild -version
+      - name: Build C core, PicoKit and the app
+        run: swift build -c release
+      - name: Run tests
+        run: swift test
