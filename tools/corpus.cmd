@@ -15,7 +15,7 @@ for %%M in (archive tags search location) do (
 )
 cl %CORPUS_CFLAGS% tools\corpus.c /Fo"build\corpus.obj" /Fe"build\corpus.exe" /link build\corpus.res /SUBSYSTEM:CONSOLE /MANIFEST:EMBED /MANIFESTINPUT:src\app.manifest %CORPUS_LIBS%
 if errorlevel 1 exit /b 1
-cl %CORPUS_CFLAGS% tools\unicode_golden.c /Fo"build\unicode_golden.obj" /Fe"build\unicode_golden.exe" /link /SUBSYSTEM:CONSOLE build\corpus-tags.obj normaliz.lib
+cl %CORPUS_CFLAGS% tools\unicode_golden.c /Fo"build\unicode_golden.obj" /Fe"build\unicode_golden.exe" /link /SUBSYSTEM:CONSOLE build\corpus-tags.obj user32.lib normaliz.lib
 if errorlevel 1 exit /b 1
 if exist build\corpus rmdir /s /q build\corpus
 mkdir build\corpus
