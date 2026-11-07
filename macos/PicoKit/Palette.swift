@@ -1,7 +1,7 @@
 import PicoCore
 
 /// An sRGB color with components from 0 to 1.
-public struct RGBColor: Sendable, Equatable {
+public struct NoteColor: Sendable, Equatable {
     public let red: Double, green: Double, blue: Double
 
     init(_ packed: UInt32) {
@@ -25,7 +25,7 @@ public enum Palette: Int, CaseIterable, Sendable {
         }
     }
 
-    public func card(_ color: Int) -> RGBColor { RGBColor(pc_note_rgb(Int32(rawValue), Int32(color))) }
-    public func ink(_ color: Int) -> RGBColor { RGBColor(pc_ink_rgb(Int32(rawValue), Int32(color))) }
-    public func bar(_ color: Int) -> RGBColor { RGBColor(pc_bar_rgb(Int32(rawValue), Int32(color))) }
+    public func card(_ color: Int) -> NoteColor { NoteColor(pc_note_rgb(Int32(rawValue), Int32(color))) }
+    public func ink(_ color: Int) -> NoteColor { NoteColor(pc_ink_rgb(Int32(rawValue), Int32(color))) }
+    public func bar(_ color: Int) -> NoteColor { NoteColor(pc_bar_rgb(Int32(rawValue), Int32(color))) }
 }

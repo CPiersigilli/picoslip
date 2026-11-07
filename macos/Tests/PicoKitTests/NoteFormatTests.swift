@@ -72,11 +72,11 @@ import Testing
 
 @Suite struct PaletteTests {
     @Test func colorsMatchColorsH() {
-        #expect(Palette.pastel.card(0) == RGBColor(0xffee97))
-        #expect(Palette.yellowOnly.card(3) == RGBColor(0xfada80))
-        #expect(Palette.blackAndWhite.ink(1) == RGBColor(0xffffff))
-        #expect(Palette.blackAndWhite.ink(2) == RGBColor(0x000000))
-        #expect(Palette.pastel.bar(0) == RGBColor(0xefdf8d))   // 255,238,151 at 94%
+        #expect(Palette.pastel.card(0) == NoteColor(0xffee97))
+        #expect(Palette.yellowOnly.card(3) == NoteColor(0xfada80))
+        #expect(Palette.blackAndWhite.ink(1) == NoteColor(0xffffff))
+        #expect(Palette.blackAndWhite.ink(2) == NoteColor(0x000000))
+        #expect(Palette.pastel.bar(0) == NoteColor(0xefdf8d))   // 255,238,151 at 94%
         #expect(Palette.pastel.card(99) == Palette.pastel.card(0))
     }
 }

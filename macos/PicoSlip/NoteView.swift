@@ -67,7 +67,7 @@ private struct BarButton: View {
 }
 
 extension Color {
-    init(_ color: RGBColor) {
+    init(_ color: NoteColor) {
         self.init(.sRGB, red: color.red, green: color.green, blue: color.blue)
     }
 }
