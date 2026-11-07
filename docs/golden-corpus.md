@@ -4,7 +4,7 @@ The corpus is the Windows reference that any other PicoSlip implementation (the 
 
 ## How to regenerate
 
-Run the **Golden corpus** workflow from the Actions tab (`workflow_dispatch`), then download the `picoslip-golden-corpus` artifact. Locally, on Windows with the MSVC Build Tools: `tools\corpus.cmd`, output in `build\corpus`.
+Run the **Golden corpus** workflow from the Actions tab (`workflow_dispatch`), then download the `picoslip-golden-corpus` artifact. It also runs on pull requests that change `src/` or the generators, so every such change shows the corpus it would produce. Locally, on Windows with the MSVC Build Tools: `tools\corpus.cmd`, output in `build\corpus`.
 
 Two generators, both C17 and built with the same `/W4 /WX` flags as the app:
 
