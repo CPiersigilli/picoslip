@@ -9,3 +9,7 @@ notes/
 *.bmp
 *.zip
 *.tmp
+.build/
+.swiftpm/
+DerivedData/
+xcuserdata/
