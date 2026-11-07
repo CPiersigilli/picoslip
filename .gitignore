@@ -13,3 +13,4 @@ notes/
 .swiftpm/
 DerivedData/
 xcuserdata/
+.DS_Store
