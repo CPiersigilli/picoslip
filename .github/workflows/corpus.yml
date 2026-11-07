@@ -1,0 +1,21 @@
+name: Golden corpus
+# Manual run: regenerates the Windows reference files used by ports (docs/golden-corpus.md).
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  corpus:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Build and run the corpus generators
+        shell: cmd
+        run: tools\corpus.cmd
+      - name: Save the corpus
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: picoslip-golden-corpus
+          path: build/corpus
+          if-no-files-found: error
