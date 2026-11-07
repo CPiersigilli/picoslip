@@ -87,3 +87,4 @@ Live result updates reuse their reserved storage; body-only saves reuse the tag 
 Run `tools/capture.ps1` with ImageMagick installed to regenerate both PNGs and both GIFs; `-NotesOnly` or `-BrowserOnly` refreshes one walkthrough. Each uses a different local painting from `Downloads/StillTyping/Selection`; pass `-BackgroundRoot` to select another copy of that collection. No backgrounds are downloaded and the desktop wallpaper is unchanged. Temporary frames are removed after successful conversion.
 
 Backgrounds from the Birmingham Museums Trust collection in StillTyping: **Night with her Train of Stars** (`notes.png`), **0ZbwwI6VV3E** (`palettes.png`), **February Fill Dyke** (`notes-demo.gif`), **Walton-on-the-Naze** (`browser-demo.gif`). The exact source filenames are listed in `tools/capture.ps1`.
+Porting macOS in corso.
