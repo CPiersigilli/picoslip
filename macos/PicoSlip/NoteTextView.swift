@@ -3,15 +3,23 @@ import SwiftUI
 import PicoKit
 
 /// The note editor. NSTextView, not SwiftUI's TextEditor, because later phases
-/// need key interception, checkbox clicks and text measurement.
+/// need key interception, checkbox clicks and text measurement. It sits in the
+/// standard scroll view so text starts at the top; scrollers stay hidden.
 struct NoteTextView: NSViewRepresentable {
     let note: Note
     let ink: NSColor
+    let font: NSFont
 
     func makeCoordinator() -> Coordinator { Coordinator(note: note) }
 
-    func makeNSView(context: Context) -> NSTextView {
-        let textView = NSTextView()
+    func makeNSView(context: Context) -> NSScrollView {
+        let scrollView = NSTextView.scrollableTextView()
+        scrollView.drawsBackground = false
+        scrollView.hasVerticalScroller = false
+        scrollView.hasHorizontalScroller = false
+        scrollView.verticalScrollElasticity = .none
+        scrollView.horizontalScrollElasticity = .none
+        let textView = scrollView.documentView as! NSTextView
         textView.delegate = context.coordinator
         textView.isRichText = true
         textView.allowsUndo = true
@@ -21,18 +29,24 @@ struct NoteTextView: NSViewRepresentable {
         textView.isAutomaticQuoteSubstitutionEnabled = false
         textView.isAutomaticDashSubstitutionEnabled = false
         textView.isAutomaticTextReplacementEnabled = false
-        // Windows uses bold Consolas 11 pt; this is the closest system face.
-        textView.font = .monospacedSystemFont(ofSize: 13, weight: .bold)
-        textView.textColor = ink
-        textView.insertionPointColor = ink
-        textView.typingAttributes = [.font: textView.font!, .foregroundColor: ink]
         textView.string = note.body
+        apply(to: textView)
         Task { textView.window?.makeFirstResponder(textView) }
-        return textView
+        return scrollView
     }
 
-    func updateNSView(_ textView: NSTextView, context: Context) {
+    func updateNSView(_ scrollView: NSScrollView, context: Context) {
+        guard let textView = scrollView.documentView as? NSTextView else { return }
         if textView.string != note.body { textView.string = note.body }
+        apply(to: textView)
+    }
+
+    /// Font and ink for existing and newly typed text.
+    private func apply(to textView: NSTextView) {
+        if textView.font != font { textView.font = font }
+        if textView.textColor != ink { textView.textColor = ink }
+        textView.insertionPointColor = ink
+        textView.typingAttributes = [.font: font, .foregroundColor: ink]
     }
 
     final class Coordinator: NSObject, NSTextViewDelegate {

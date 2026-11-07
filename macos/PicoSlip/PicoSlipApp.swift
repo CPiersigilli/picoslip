@@ -9,6 +9,7 @@ struct PicoSlipApp: App {
         MenuBarExtra("PicoSlip", systemImage: "note.text") {
             Button("New note") { appDelegate.notes.newNote() }
                 .keyboardShortcut("n")
+            NoteStylePicker()
             Divider()
             Button("Exit") { NSApplication.shared.terminate(nil) }
                 .keyboardShortcut("q")

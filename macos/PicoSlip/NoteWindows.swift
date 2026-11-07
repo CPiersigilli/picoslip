@@ -5,7 +5,6 @@ import PicoKit
 /// Owns the open note panels: creation, cascading and collapse.
 final class NoteWindows {
     static let size = NSSize(width: 300, height: 240)   // "Medium", as on Windows
-    static let barHeight: CGFloat = 32
 
     private var panels: [String: NotePanel] = [:]
     private var nextColor = 0
@@ -41,7 +40,7 @@ final class NoteWindows {
     }
 }
 
-/// Borderless floating panel; SwiftUI draws the card, border and title bar.
+/// Borderless floating panel; SwiftUI draws the card, its outline and title bar.
 final class NotePanel: NSPanel {
     var onClose: (() -> Void)?
     private let note: Note
@@ -61,7 +60,8 @@ final class NotePanel: NSPanel {
         contentView = NSHostingView(rootView: NoteView(
             note: note,
             onToggle: { [weak self] in self?.toggleCollapsed() },
-            onClose: { [weak self] in self?.close() }))
+            onClose: { [weak self] in self?.close() },
+            onStyleChange: { [weak self] in self?.fitCollapsedHeight() }))
     }
 
     @available(*, unavailable)
@@ -78,10 +78,18 @@ final class NotePanel: NSPanel {
 
     /// Collapsing keeps only the title bar and the top edge in place.
     private func toggleCollapsed() {
-        var frame = self.frame
         if !note.collapsed { expandedHeight = frame.height }
         note.collapsed.toggle()
-        let height = note.collapsed ? NoteWindows.barHeight : expandedHeight
+        setHeight(note.collapsed ? NoteStyle.current.barHeight : expandedHeight)
+    }
+
+    /// The two styles have different title bars; a collapsed note follows.
+    private func fitCollapsedHeight() {
+        if note.collapsed { setHeight(NoteStyle.current.barHeight) }
+    }
+
+    private func setHeight(_ height: CGFloat) {
+        var frame = self.frame
         frame.origin.y += frame.height - height
         frame.size.height = height
         setFrame(frame, display: true, animate: false)
