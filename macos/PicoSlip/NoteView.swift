@@ -1,12 +1,20 @@
 import SwiftUI
 import PicoKit
 
+/// Window-level actions the card asks its panel for.
+struct NoteActions {
+    let toggleCollapsed: () -> Void
+    let close: () -> Void
+    let menu: () -> NSMenu
+    let setTitle: (String?) -> Void
+    let styleChanged: () -> Void
+}
+
 /// The note card in either style. Colors always come from the shared palettes.
 struct NoteView: View {
     @Bindable var note: Note
-    let onToggle: () -> Void
-    let onClose: () -> Void
-    let onStyleChange: () -> Void
+    let editor: NSScrollView
+    let actions: NoteActions
     @AppStorage(NoteStyle.storageKey) private var style: NoteStyle = .mac
     @State private var hovering = false
 
@@ -16,54 +24,120 @@ struct NoteView: View {
 
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: style.cornerRadius, style: .continuous)
+        let insets = style.textInsets
         VStack(spacing: 0) {
             titleBar
             if style == .windows { Rectangle().fill(ink).frame(height: 1) }
             if !note.collapsed {
-                NoteTextView(note: note, ink: NSColor(ink), font: style.bodyFont)
-                    .padding(style == .mac
-                             ? EdgeInsets(top: 2, leading: 12, bottom: 12, trailing: 12)
-                             : EdgeInsets(top: 6, leading: 10, bottom: 10, trailing: 10))
+                EditorHost(view: editor)
+                    .padding(EdgeInsets(top: insets.top, leading: insets.left, bottom: insets.bottom, trailing: insets.right))
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(card, in: shape)
         .overlay(shape.strokeBorder(style == .mac ? ink.opacity(0.12) : ink, lineWidth: style == .mac ? 0.5 : 1))
+        .overlay(alignment: .topTrailing) {
+            if note.saveFailed {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.red)
+                    .help("This note could not be saved. PicoSlip keeps retrying.")
+                    .padding(8)
+            }
+        }
         .clipShape(shape)
         .onHover { hovering = $0 }
         .background(ShadowRefresher(style: style, collapsed: note.collapsed))
-        .onChange(of: style) { onStyleChange() }
+        .onChange(of: style) { actions.styleChanged() }
     }
 
     private var titleBar: some View {
         HStack(spacing: 0) {
             if style == .mac {
                 HStack(spacing: 7) {
-                    MacButton(symbol: "xmark", ink: ink, action: onClose)
-                    MacButton(symbol: note.collapsed ? "plus" : "minus", ink: ink, action: onToggle)
+                    MacButton(symbol: "xmark", ink: ink, action: actions.close)
+                    MacButton(symbol: note.collapsed ? "plus" : "minus", ink: ink, action: actions.toggleCollapsed)
                 }
                 .padding(.leading, 9)
                 .opacity(hovering ? 1 : 0)
                 .animation(.easeOut(duration: 0.15), value: hovering)
             }
-            Text(note.title ?? "")
-                .font(style.titleFont)
-                .foregroundStyle(ink)
-                .lineLimit(1)
-                .truncationMode(.tail)
-                .padding(.leading, style == .mac ? 8 : 10)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            ZStack(alignment: .leading) {
+                TitleBarArea(onDoubleClick: { note.editingTitle = true }, menu: actions.menu)
+                if note.editingTitle {
+                    TitleField(initial: note.title ?? "", ink: ink, font: style.titleFont, commit: actions.setTitle)
+                        .padding(.horizontal, style == .mac ? 8 : 10)
+                } else {
+                    Text(note.title ?? "")
+                        .font(style.titleFont)
+                        .foregroundStyle(ink)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .padding(.leading, style == .mac ? 8 : 10)
+                        .allowsHitTesting(false)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             if style == .windows {
                 BarButton(symbol: note.collapsed ? "square" : "minus", ink: ink, hover: card,
-                          height: style.barHeight - 1, action: onToggle)
+                          height: style.barHeight - 1, action: actions.toggleCollapsed)
                 BarButton(symbol: "xmark", ink: ink, hover: Color(red: 235 / 255, green: 161 / 255, blue: 151 / 255),
-                          height: style.barHeight - 1, action: onClose)
+                          height: style.barHeight - 1, action: actions.close)
             }
         }
         .frame(height: style == .windows ? style.barHeight - 1 : style.barHeight)
-        .background(WindowDragArea())
         .background(style == .windows ? bar : card)
-        .contextMenu { NoteStylePicker() }
+    }
+}
+
+/// Inline title editor: Enter saves, Esc cancels, an empty title removes it.
+private struct TitleField: View {
+    let initial: String
+    let ink: Color
+    let font: Font
+    let commit: (String?) -> Void
+    @State private var text = ""
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        TextField("Title", text: $text)
+            .textFieldStyle(.plain)
+            .font(font)
+            .foregroundStyle(ink)
+            .focused($focused)
+            .onSubmit { commit(text) }
+            .onExitCommand { commit(initial.isEmpty ? nil : initial) }
+            .onAppear { text = initial; focused = true }
+    }
+}
+
+/// The editor's scroll view, created and owned by the panel.
+private struct EditorHost: NSViewRepresentable {
+    let view: NSScrollView
+    func makeNSView(context: Context) -> NSScrollView { view }
+    func updateNSView(_ nsView: NSScrollView, context: Context) {}
+}
+
+/// Drag to move, double-click to edit the title, right-click for the menu.
+private struct TitleBarArea: NSViewRepresentable {
+    let onDoubleClick: () -> Void
+    let menu: () -> NSMenu
+
+    func makeNSView(context: Context) -> BarView { BarView() }
+
+    func updateNSView(_ view: BarView, context: Context) {
+        view.onDoubleClick = onDoubleClick
+        view.makeMenu = menu
+    }
+
+    final class BarView: NSView {
+        var onDoubleClick: (() -> Void)?
+        var makeMenu: (() -> NSMenu)?
+
+        override func mouseDown(with event: NSEvent) {
+            if event.clickCount == 2 { onDoubleClick?() } else { window?.performDrag(with: event) }
+        }
+
+        override func menu(for event: NSEvent) -> NSMenu? { makeMenu?() }
     }
 }
 

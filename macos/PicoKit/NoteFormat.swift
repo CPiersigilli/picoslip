@@ -84,6 +84,15 @@ public enum NoteText {
         return (title, String(decoding: units[promotion.body_start...], as: UTF16.self))
     }
 
+    /// TXT uses CRLF; the editor uses LF.
+    public static func editorText(_ stored: String) -> String {
+        stored.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
+    }
+
+    public static func storedText(_ editor: String) -> String {
+        editorText(editor).replacingOccurrences(of: "\n", with: "\r\n")
+    }
+
     /// Checklist marker opening a paragraph, if any.
     public static func todoMarker(_ paragraph: String) -> Character? {
         let units = Array(paragraph.utf16.prefix(2))

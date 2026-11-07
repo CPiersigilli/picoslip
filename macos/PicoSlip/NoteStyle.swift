@@ -24,10 +24,14 @@ nonisolated enum NoteStyle: String, CaseIterable, Sendable {
     var barHeight: CGFloat { self == .mac ? 28 : 32 }
     var cornerRadius: CGFloat { self == .mac ? 12 : 0 }
 
-    /// Windows draws all text in bold Consolas; the Mac style uses the system face.
-    /// Only the display changes: saved formatting keeps the Windows meaning.
-    var bodyFont: NSFont {
-        self == .mac ? .systemFont(ofSize: 13) : .monospacedSystemFont(ofSize: 13, weight: .bold)
+    /// Windows types in bold Consolas, so new text there is bold; the Mac style
+    /// types in the regular system face. Saved RTF keeps each run's real effects.
+    var typesBold: Bool { self == .windows }
+
+    /// Space around the text inside the card (paint_note() on Windows).
+    var textInsets: NSEdgeInsets {
+        self == .mac ? NSEdgeInsets(top: 2, left: 12, bottom: 12, right: 12)
+                     : NSEdgeInsets(top: 6, left: 10, bottom: 10, right: 10)
     }
 
     var titleFont: Font {
