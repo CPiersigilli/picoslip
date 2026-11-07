@@ -7,5 +7,6 @@
 #include "pc_note.h"
 #include "pc_text.h"
 #include "pc_palette.h"
+#include "pc_ini.h"
 
 #endif

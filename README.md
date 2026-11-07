@@ -66,6 +66,10 @@ Layout changes write one key or one complete section, preserving tags and unfami
 
 Version **1.2.0**: about **258 KiB** for the app, **408 KiB** for the installer. Measurements with 1–10 default notes: **2.47–2.59 MiB private RAM**, **17.32–21.47 MiB working set**, **0–0.16% of one CPU core at idle** (10-second samples, Windows 11 x64; UI activity can affect short samples). Run `build.cmd profile-only` with PicoSlip closed to measure the current release in an isolated portable archive.
 
+## macOS
+
+A native macOS 26 version shares the same archive format: open `Package.swift` in Xcode and run the **PicoSlip** scheme. Shortcuts use ⌘ where Windows uses Ctrl; see `docs/macos.md`.
+
 ## Build
 
 MSVC + Windows SDK: `build.cmd` builds the app and installer; `build.cmd test` runs the tests (`--interactive` adds real keyboard/mouse input). All application, installer, test and profiling code is **C17**, compiled with `/TC /W4 /WX /O2`. Windows provides the native UI and rich text editor; no third-party runtime is bundled. Release binaries are unsigned.
@@ -83,6 +87,7 @@ Live result updates reuse their reserved storage; body-only saves reuse the tag 
 ## Documentation and folders
 
 - `src/`: application, archive, search, tags, archive locations, installer and Windows resources.
+- `core/`, `macos/`, `Package.swift`: portable C17 core and the macOS app (`docs/macos.md`).
 - `tests/`: integration tests and native demonstration capture, using isolated temporary archives.
 - `tools/`: C profiling/icon tools and build-support scripts.
 - `assets/`, `docs/screenshots/`: icon and the four published visual examples.
